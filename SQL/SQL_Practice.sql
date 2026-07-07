@@ -1,0 +1,2 @@
+-- SQL Practice Questions
+-- This file contains all my SQL practice problems and solutions
