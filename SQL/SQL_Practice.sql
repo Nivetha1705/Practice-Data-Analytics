@@ -55,3 +55,75 @@ FROM employees;
 
 SELECT MIN(salary) AS MIN_salary, MAX(salary) AS max_salary
 FROM employees;
+
+11.Calculate the total salary expenditure across all employees.
+
+SELECT SUM(salary) AS total_salary
+FROM employees;
+
+12.Calculate the average salary across all employees.
+
+SELECT AVG(salary) AS average_salary
+FROM employees;
+
+13.Return employees whose first name starts with the letter A.
+
+SELECT first_name, last_name FROM employees
+WHERE first_name LIKE 'A%';
+
+14.Return employees who work in the IT or HR department using the IN operator.
+
+SELECT first_name,last_name,department_id
+FROM employees
+WHERE department_id IN(10,20);
+
+15.Return employees with salaries between $60,000 and $90,000.
+
+SELECT first_name,last_name,salary
+FROM employees
+WHERE salary BETWEEN 60000 AND 90000;
+
+16.Build an employee summary report with readable alias names.
+
+SELECT employee_id AS `Employee Number`,
+  concat(first_name,' ',last_name) AS `Full Name`,
+  salary AS `Annual Salary`,
+  hire_date AS `Start Date`
+FROM employees
+ORDER BY salary DESC;
+
+17.Create a single combined result set of employees and managers.
+
+SELECT first_name, last_name, 'Employee' AS role
+FROM employees
+UNION
+SELECT distinct m.first_name, m.last_name,'Manager' AS role
+FROM employees e
+JOIN employees m
+on e.manager_id=m.employee_id
+ORDER BY last_name ;
+
+18.Return each employee with the name of their department.
+
+SELECT e.first_name, e.last_name, d.department_name
+FROM employees e
+INNER JOIN departments d
+on e.department_id=d.department_id;
+
+19.Count employees in each department.
+
+SELECT d.department_name,COUNT(e.employee_id) AS employee_count
+FROM departments d
+LEFT JOIN employees e
+on e.department_id = d.department_id
+GROUP BY department_name;
+
+20.Return departments that currently have more than 1 employee.
+
+SELECT d.department_name , COUNT(e.employee_id) AS employee_count
+FROM employees e
+JOIN departments d
+on d.department_id = e.department_id
+GROUP BY department_name
+HAVING COUNT(e.employee_id)>1
+ORDER BY department_name;
