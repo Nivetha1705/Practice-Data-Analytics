@@ -1,6 +1,9 @@
 -- SQL Practice Questions
 -- This file contains all my SQL practice problems and solutions
 
+
+--SCHEMEA - HR
+
 1.Return the complete employee roster from the employees table.
 
 SELECT * FROM employees;
@@ -227,3 +230,66 @@ on e.department_id = d.department_id)
 SELECT first_name, last_name, department_name, salary
 FROM employee_rank
 WHERE salary_rank = 1;
+
+
+--SCHEMEA - E-COMMERCE
+
+1.Return the complete customer roster from the customers table.
+
+SELECT customer_id,first_name,last_name,email,registration_date,city,Country
+FROM customers;
+
+2.Return products that cost more than $100.
+
+SELECT product_name,price
+FROM products
+WHERE price>100;
+
+3.Return all products ordered by price descending.
+
+SELECT product_name, price
+FROM products
+ORDER BY price DESC;
+
+4.Return customers from the USA.
+
+SELECT first_name,last_name,city
+FROM customers
+WHERE Country = 'USA';
+
+5.Count the total number of products.
+
+SELECT COUNT(product_id) AS total_products
+FROM products;
+
+6.Calculate the average price across all products.
+
+SELECT AVG(price) AS average_price
+FROM products;
+
+7.Return products that belong to the Electronics category.
+
+SELECT product_name,price
+FROM products
+WHERE category_id=1;
+
+8.Return orders with a delivered status.
+
+SELECT ORDER_id,customer_id,total_amount
+FROM orders
+WHERE status='delivered'
+ORDER BY total_amount DESC;
+
+9.Return products with stock quantities greater than 50.
+
+SELECT product_name, stock_quantity
+FROM products
+WHERE stock_quantity > 50;
+
+10.Return June 2023 orders and calculate how many days ago each order was placed as of 2023-07-01.
+
+SELECT order_id,customer_id,order_date,total_amount,status,
+datediff('2023-07-01',order_date) AS days_ago
+FROM orders
+WHERE order_date>='2023-06-01' AND order_date<'2023-07-01'
+ORDER BY order_date;
