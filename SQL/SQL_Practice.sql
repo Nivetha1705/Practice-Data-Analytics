@@ -1,4 +1,4 @@
--- SQL Practice Questions
+c-- SQL Practice Questions
 -- This file contains all my SQL practice problems and solutions
 
 
@@ -293,3 +293,101 @@ datediff('2023-07-01',order_date) AS days_ago
 FROM orders
 WHERE order_date>='2023-06-01' AND order_date<'2023-07-01'
 ORDER BY order_date;
+
+11.Return each unique country with at least one registered customer.
+
+SELECT DISTINCT country FROM customers
+ORDER BY country;
+
+12.Return customers who registered between January 1 and March 31, 2023.
+
+SELECT first_name,last_name,registration_date,country
+FROM customers
+WHERE registration_date BETWEEN '2023-01-01' AND '2023-03-31'
+ORDER BY registration_date;
+
+13.Return customers who have not provided their city.
+
+SELECT first_name,last_name,email,registration_date 
+FROM customers
+WHERE city IS NULL;
+
+14.Return customer names together with their order information.
+
+SELECT c.first_name,c.last_name,o.ORDER_id,o.total_amount,o.status
+FROM customers c
+inner JOIN ORDERs o
+on c.customer_id=o.customer_id
+ORDER BY total_amount;
+
+15.Count the number of orders per customer.
+
+SELECT c.first_name,c.last_name, COUNT(o.ORDER_id) AS ORDER_count
+FROM customers AS c
+LEFT JOIN orders AS o
+on c.customer_id = o.customer_id
+GROUP BY c.customer_id
+ORDER BY ORDER_count DESC;
+
+16.Return products together with their category names.
+
+SELECT p.product_name,c.category_name,p.price
+FROM products AS p
+JOIN categories AS c
+on c.category_id=p.category_id;
+
+17.Return categories with more than $200 in revenue.
+
+SELECT c.category_name, 
+SUM(o.quantity * o.unit_price) AS total_revenue
+FROM categories AS c
+JOIN products AS p
+on c.category_id = p.category_id
+JOIN ORDER_items AS o
+on p.product_id=o.product_id
+GROUP BY category_name
+HAVING total_revenue>200
+ORDER BY category_name;
+
+18.Return products that have never appeared in any order.
+
+SELECT p.product_name,p.price,p.stock_quantity
+FROM products AS p
+left JOIN ORDER_items AS o
+on p.product_id=o.product_id
+WHERE o.product_id IS NULL
+ORDER BY p.price DESC;
+
+19.Return non-Electronics products priced below the most expensive Electronics item.
+
+SELECT p.product_name,p.price,c.category_name
+FROM categories AS c
+JOIN products AS p
+on c.category_id = p.category_id
+WHERE c.category_name <> 'Electronics' AND 
+p.price < (SELECT 
+AVG(p2.price)
+FROM products AS p2
+JOIN categories AS c2
+on c2.category_id = p2.category_id
+WHERE c2.category_name='Electronics')
+ORDER BY p.price;
+
+20.Return every order item with the customer name, category name, product name, quantity, and unit price.
+
+SELECT
+  c.first_name,
+  c.last_name,
+  cat.category_name,
+  p.product_name,
+  oi.quantity,
+  oi.unit_price
+FROM
+  customers c
+  JOIN orders o ON c.customer_id = o.customer_id
+  JOIN order_items oi ON o.order_id = oi.order_id
+  JOIN products p ON oi.product_id = p.product_id
+  JOIN categories cat ON p.category_id = cat.category_id
+ORDER BY
+  c.last_name,
+  cat.category_name;
