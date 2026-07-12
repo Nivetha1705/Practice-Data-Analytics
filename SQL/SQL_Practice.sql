@@ -391,3 +391,160 @@ FROM
 ORDER BY
   c.last_name,
   cat.category_name;
+
+21.Return all customers with their order status, replacing missing order status values with a readable label.
+
+SELECT c.first_name,c.last_name,c.COUNTry,
+COALESCE(o.status, 'No Orders') AS ORDER_status,
+o.total_amount
+FROM customers AS c
+left JOIN ORDERs AS o
+on c.customer_id=o.customer_id
+ORDER BY last_name;
+
+22.Combine fulfilled and pending orders into one labeled result set.
+
+SELECT order_id,customer_id,status,total_amount,'Fulfilled' AS urgency 
+from orders
+WHERE status IN ('shipped','delivered')
+UNION ALL
+SELECT ORDER_id,customer_id,status,total_amount,'Action Required' AS urgency
+FROM orders
+WHERE status='pending'
+ORDER BY urgency,ORDER_id;
+
+23.Rank all products by price across the entire catalog.
+
+SELECT product_name,price, 
+ROW_NUMBER() OVER(ORDER BY price DESC) AS price_rank
+FROM products
+ORDER BY price DESC;
+
+24.Return the top customer by total spending using a subquery.
+
+SELECT c.first_name,c.last_name,o.total_spent
+FROM customers AS c
+JOIN(SELECT customer_id, SUM(total_amount) AS total_spent
+FROM orders
+GROUP BY customer_id) AS o
+on c.customer_id=o.customer_id
+WHERE o.total_spent=(
+  SELECT MAX(total_spent)
+  FROM(
+    SELECT customer_id,SUM(total_amount) AS total_spent
+    FROM orders
+    GROUP BY customer_id
+  ) AS spending
+);
+
+
+25.For every customer, calculate order count, total spend, delivered spend, and assign a customer tier.
+
+SELECT
+    c.first_name,
+    c.last_name,
+    c.country,
+    COUNT(o.order_id) AS total_orders,
+    SUM(o.total_amount) AS total_spent,
+    CASE
+        WHEN SUM(o.total_amount) > 1000 THEN 'VIP'
+        WHEN SUM(o.total_amount) > 500 THEN 'Premium'
+        ELSE 'Regular'
+    END AS customer_tier,
+    CASE
+        WHEN COUNT(o.order_id) = 0 THEN 0
+        ELSE SUM(
+            CASE
+                WHEN o.status = 'delivered' THEN o.total_amount
+                ELSE 0
+            END
+        )
+    END AS delivered_value
+FROM customers AS c
+LEFT JOIN orders AS o
+ON c.customer_id = o.customer_id
+GROUP BY
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    c.country
+ORDER BY total_spent DESC;
+
+26.Rank customers by total spending and assign percentile-style tiers.
+
+WITH customer_spending AS
+(
+    SELECT
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.country,
+        SUM(o.total_amount) AS total_spent
+    FROM customers c
+    LEFT JOIN orders o
+        ON c.customer_id = o.customer_id
+    GROUP BY
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.country
+)
+
+SELECT
+    first_name,
+    last_name,
+    country,
+    total_spent,
+    NTILE(3) OVER (ORDER BY total_spent DESC NULLS LAST) AS spending_tier,
+    PERCENT_RANK() OVER (ORDER BY total_spent ) AS percentile_rank
+FROM customer_spending
+ORDER BY total_spent DESC;
+
+27.Use a CTE to find the highest-priced product in each category.
+
+WITH highest_priced AS(
+  SELECT category_id,
+  MAX(price) AS MAX_price
+  FROM products
+  GROUP BY category_id
+)
+SELECT p.product_name,c.category_name,p.price
+FROM products p
+JOIN highest_priced h on p.category_id = h.category_id AND p.price=h.MAX_price
+JOIN categories c on c.category_id=p.category_id
+ORDER BY p.price DESC;
+
+28.Rank products by price within their own category.
+
+SELECT p.product_name,c.category_name,p.price AS price,
+RANK() OVER(PARTITION BY c.category_id ORDER BY p.price DESC)AS price_rank
+FROM products AS p
+JOIN categories AS c
+on c.category_id=p.category_id
+ORDER BY category_name;
+
+29.Return products priced above the average price of their own category.
+
+SELECT p.product_name, c.category_name, p.price AS price
+FROM products AS p
+JOIN categories AS c
+on c.category_id=p.category_id
+WHERE price >(SELECT AVG(p2.price)
+FROM products AS p2
+WHERE p2.category_id=p.category_id)
+ORDER BY c.category_name DESC,p.price DESC ;
+
+30.Return the top 5 products by total revenue.
+
+SELECT
+  p.product_name,
+  c.category_name,
+  SUM(o.quantity) AS total_qty_sold,
+  SUM(o.quantity * o.unit_price) AS total_revenue
+FROM
+ORDER_items AS o
+JOIN products p on o.product_id=p.product_id
+JOIN categories c on c.category_id=p.category_id
+GROUP BY p.product_name, c.category_name,p.product_id
+ORDER BY total_revenue DESC
+LIMIT 5;
