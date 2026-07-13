@@ -548,3 +548,67 @@ JOIN categories c on c.category_id=p.category_id
 GROUP BY p.product_name, c.category_name,p.product_id
 ORDER BY total_revenue DESC
 LIMIT 5;
+
+
+--SCHEMA - SCHOOL
+
+1.Return the complete student roster from the students table.
+
+SELECT * FROM students;
+
+2.Return students who are majoring in Computer Science.
+
+SELECT first_name,last_name,graduation_year
+FROM students
+WHERE major='Computer Science';
+
+3.Return all courses ordered by credit hours from highest to lowest.
+
+SELECT course_name, credits
+FROM courses
+ORDER BY credits DESC;
+
+4.Return students who are expected to graduate in 2026.
+
+SELECT first_name,last_name,major 
+FROM students
+WHERE graduation_year ='2026';
+
+5.Count the total number of courses available.
+
+SELECT COUNT(course_id) AS total_courses
+FROM courses;
+
+6.Calculate the average number of credits per course.
+
+SELECT AVG(credits) AS average_credits
+FROM courses;
+
+7.Return students who enrolled after December 31, 2022.
+
+SELECT first_name,last_name, enrollment_date
+FROM students
+WHERE enrollment_date > '2022-12-31'
+ORDER BY last_name;
+
+8.Return professors who work in the Computer Science department.
+
+SELECT first_name,last_name,hire_date
+FROM professors 
+WHERE department='Computer Science';
+
+9.Return students whose email addresses contain the university.edu domain.
+
+SELECT first_name,last_name,email,major
+FROM students
+WHERE email LIKE '%university.edu'
+ORDER BY last_name;
+
+10.A department administrator wants to see which professors are teaching which courses. Show each professor's name, department, and the courses they are responsible for. Order by professor last name, then course name.
+
+SELECT p.first_name,p.last_name,p.department,c.course_name,c.credits
+FROM professors AS p
+JOIN courses AS c
+on c.professor_id=p.professor_id
+ORDER BY last_name;
+
