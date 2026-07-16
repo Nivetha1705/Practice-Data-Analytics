@@ -939,3 +939,51 @@ HAVING total_credits >
   )AS t
 )
 ORDER BY total_credits DESC; 
+
+---SCHEMA - BANKING ---
+
+1.Return the complete customer roster from the customers table.
+SELECT * FROM customers;
+
+2.Return all branch names and their cities.
+SELECT branch_name,city
+FROM branches;
+
+3.Return all accounts with account type Savings.
+SELECT account_id,customer_id,balance
+FROM accounts
+WHERE account_type='Savings';
+
+4.Return accounts with a balance greater than $10,000.
+SELECT customer_id,account_type,balance 
+FROM accounts
+WHERE balance>10000;
+
+5.Return all transactions of type Deposit.
+SELECT transaction_id,account_id,amount,transaction_date
+FROM transactions
+WHERE transaction_type='Deposit';
+
+6.Return all loans with an Active status.
+SELECT loan_id,customer_id,loan_amount,interest_rate 
+FROM loans
+WHERE status='Active';
+
+7.Count the total number of accounts.
+SELECT COUNT(account_id) as total_accounts FROM accounts;
+
+8.Sum the total amount across all Deposit transactions.
+SELECT SUM(amount) AS total_deposits
+FROM transactions
+WHERE transaction_type='Deposit';
+
+9.The product team needs a list of all account types offered. Find all unique account types available. Show account_type ordered alphabetically.
+SELECT DISTINCT account_type
+FROM accounts
+ORDER BY account_type;
+
+10.The audit team needs to review mid-month activity. Find all transactions where transaction_date is between January 10 and January 20, 2025 (inclusive). Show transaction_id, account_id, amount, and transaction_date. Order by transaction_date.
+SELECT transaction_id,account_id,amount,transaction_date
+FROM transactions
+WHERE transaction_date BETWEEN '2025-01-10' AND '2025-01-20'
+ORDER BY transaction_date;
