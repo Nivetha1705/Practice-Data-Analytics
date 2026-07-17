@@ -987,3 +987,80 @@ SELECT transaction_id,account_id,amount,transaction_date
 FROM transactions
 WHERE transaction_date BETWEEN '2025-01-10' AND '2025-01-20'
 ORDER BY transaction_date;
+
+11.The new-accounts team wants to follow up with registered customers who have not yet opened any account. Find all customers who have no accounts. Show first name and last name.
+SELECT c.first_name, c.last_name
+FROM customers AS c
+left JOIN accounts AS a
+on c.customer_id=a.customer_id
+WHERE a.account_id IS NULL
+ORDER BY last_name;
+
+12.The loans department needs to identify customers who have not taken any loan — potential targets for a new loan campaign. Find all customers who have no loans. Show first name and last name ordered by last name.
+SELECT c.first_name,c.last_name
+FROM customers AS c
+LEFT JOIN loans AS l
+on c.customer_id=l.customer_id
+WHERE l.loan_id IS NULL
+ORDER BY c.last_name;
+
+13.The relationship management team wants to know how diversified each customer's portfolio is. Show every customer's full name and the number of accounts they hold (including zero). Order by account_count descending, then last name.
+SELECT c.first_name,c.last_name,COUNT(a.account_id) AS account_count
+FROM customers AS c
+LEFT JOIN accounts AS a
+on c.customer_id=a.customer_id
+GROUP BY c.customer_id
+ORDER BY account_count DESC;
+
+14.Calculate the total balance for each account type.
+SELECT account_type,sum(balance) AS total_balance
+FROM accounts 
+GROUP BY account_type
+ORDER BY account_type;
+
+15.Return each customers name alongside their branch name.
+SELECT c.first_name, c.last_name, b.branch_name
+FROM customers AS c
+JOIN branches AS b
+on c.branch_id=b.branch_id
+ORDER BY c.last_name;
+
+16.Return each transaction with the transaction date, amount, type, and the customers last name.
+SELECT t.transaction_date,t.amount,t.transaction_type,c.last_name
+FROM transactions AS t
+JOIN customers AS c
+on t.account_id=a.account_id
+JOIN accounts AS a
+on a.customer_id=c.customer_id
+ORDER BY t.transaction_date;
+
+17.Return the number of customers assigned to each branch.
+SELECT b.branch_name,COUNT(c.customer_id) as customer_count
+FROM branches AS b
+left JOIN customers AS c
+on b.branch_id=c.branch_id
+GROUP BY branch_name
+ORDER BY customer_count DESC;
+
+18.Return the number of accounts held by each customer.
+SELECT customer_id,count(account_id) AS account_count
+FROM accounts
+GROUP BY customer_id
+ORDER BY customer_id;
+
+19.Return each loan with the borrowers first and last name, loan amount, and status.
+SELECT c.first_name,c.last_name,l.loan_amount,l.status
+FROM customers AS c
+JOIN loans AS l
+on c.customer_id=l.customer_id
+ORDER BY l.loan_amount DESC;
+
+20.Return the total account balance held by customers at each branch.
+SELECT branch_name, sum(a.balance) AS total_balance
+FROM branches AS b 
+JOIN customers AS c
+on b.branch_id = c.branch_id
+JOIN accounts AS a
+on c.customer_id=a.customer_id
+GROUP BY branch_name
+ORDER BY total_balance DESC;
