@@ -1064,3 +1064,157 @@ JOIN accounts AS a
 on c.customer_id=a.customer_id
 GROUP BY branch_name
 ORDER BY total_balance DESC;
+
+21.The branch operations team wants a portfolio view of every customer's holdings. Show each customer's name, their branch name, account type, and balance. Order by branch name, then customer last name.
+SELECT c.first_name,c.last_name,b.branch_name,a.account_type,a.balance
+FROM customers AS C
+JOIN accounts AS a
+on c.customer_id=a.customer_id
+JOIN branches AS b
+on b.branch_id=c.branch_id
+ORDER BY b.branch_name,c.last_name;
+
+22.For each account that has transactions, show total deposits and total withdrawals side by side using conditional aggregation. Order by account_id.
+SELECT account_id,
+SUM(
+  CASE WHEN transaction_type='Deposit' THEN amount
+  ELSE 0
+  END
+) AS total_deposits,
+SUM(
+  CASE WHEN transaction_type='Withdrawal' THEN amount
+  ELSE 0
+  END
+) AS total_withdrawals
+FROM transactions
+GROUP BY account_id
+ORDER BY account_id;
+
+
+23.Group transactions by year-month (using strftime). Show month, transaction count, and total amount. Order by month ascending.
+SELECT DATE_FORMAT(transaction_date, '%Y-%m') AS month,
+COUNT(transaction_id) AS transaction_count,
+SUM(amount) AS total_amount
+FROM transactions
+ORDER BY month; 
+
+24.The operations team wants to contact customers who have never used their accounts. Find customers who have no transactions in any of their accounts. Show first name and last name.
+SELECT
+  c.first_name,
+  c.last_name
+FROM
+  customers c
+WHERE
+  NOT EXISTS (
+    SELECT *
+    FROM
+      accounts a
+      JOIN transactions t ON a.account_id = t.account_id
+    WHERE
+      a.customer_id = c.customer_id
+  )
+ORDER BY
+  c.last_name;
+
+25.Create a cash flow list combining all deposits (labelled 'Income') and all withdrawals (labelled 'Expense') into one unified report. Show account_id, amount, flow_type, and transaction_date. Order by transaction_date.
+SELECT account_id,amount,
+'Income' AS flow_type,
+transaction_date
+FROM transactions
+WHERE transaction_type='Deposit'
+UNION ALL
+SELECT account_id,amount,
+'Expense' AS flow_type,
+transaction_date
+FROM transactions
+WHERE transaction_type='Withdrawal'
+ORDER BY transaction_date;
+
+26.Find the customer with the largest total active loan amount. Show first name, last name, and total_loans. Only include Active loans.
+SELECT c.first_name,c.last_name,SUM(l.loan_amount)AS total_loans
+FROM customers AS c
+JOIN loans AS l
+on c.customer_id=l.customer_id
+WHERE l.status='Active'
+GROUP BY c.customer_id,c.first_name,c.last_name
+ORDER BY total_loans DESC
+LIMIT 1;
+
+27.The wealth management team wants to identify accounts performing above their peer group. Find accounts with a balance above the average balance for their account_type. Show account_id, account_type, balance, and customer name.
+SELECT a.account_id, a.account_type,a.balance, c.first_name,c.last_name
+FROM customers AS c
+JOIN accounts as a
+on c.customer_id=a.customer_id
+WHERE a.balance > (
+  SELECT 
+  AVG(balance)
+  FROM accounts AS a2
+  WHERE a.account_type=a2.account_type
+)
+GROUP BY account_id
+ORDER BY account_type, balance DESC;
+
+28.Rank accounts by balance within each account type using a window function. Show account_id, account_type, balance, and balance_rank. Order by account_type, then rank.
+SELECT account_id, account_type, balance, 
+DENSE_RANK() OVER(PARTITION by account_type ORDER BY balance DESC) AS balance_rank
+FROM accounts
+ORDER BY account_type;
+
+29.The branch management team wants to identify the top depositor at each location. Find the customer with the highest total account balance in each branch. Show first name, last name, branch name, and total_balance.
+WITH
+  customer_balances AS (
+    SELECT
+      c.customer_id,
+      c.first_name,
+      c.last_name,
+      c.branch_id,
+      SUM(a.balance) AS total_balance
+    FROM
+      customers c
+      JOIN accounts a ON c.customer_id = a.customer_id
+    GROUP BY
+      c.customer_id,
+      c.first_name,
+      c.last_name,
+      c.branch_id
+  ),
+  ranked AS (
+    SELECT
+      *,
+      RANK() OVER (
+        PARTITION BY
+          branch_id
+        ORDER BY
+          total_balance DESC
+      ) AS rnk
+    FROM
+      customer_balances
+  )
+SELECT
+  r.first_name,
+  r.last_name,
+  b.branch_name,
+  r.total_balance
+FROM
+  ranked r
+  JOIN branches b ON r.branch_id = b.branch_id
+WHERE
+  r.rnk = 1
+ORDER BY
+  b.branch_name;
+
+30.The product team wants a breakdown of account distribution by balance tier. Using a CTE, classify accounts into tiers: High (balance >= 10000), Medium (balance >= 3000), Low (below 3000). Show each tiers account count, average balance, and total balance. Order by avg_balance descending.
+
+WITH tier_table AS 
+( SELECT account_id, account_type, balance, 
+CASE WHEN balance >= 10000 THEN 'High'
+WHEN balance >= 3000 THEN 'Medium' 
+ELSE 'Low' 
+END AS tier
+FROM accounts) 
+SELECT tier, COUNT(*) AS account_count,
+round(AVG(balance),2) AS AVG_balance,
+SUM(balance) AS total_balance 
+FROM tier_table
+GROUP BY tier
+ORDER BY avg_balance DESC;
