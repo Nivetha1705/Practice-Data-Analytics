@@ -1,4 +1,4 @@
-c-- SQL Practice Questions
+cc-- SQL Practice Questions
 -- This file contains all my SQL practice problems and solutions
 
 
@@ -1218,3 +1218,59 @@ SUM(balance) AS total_balance
 FROM tier_table
 GROUP BY tier
 ORDER BY avg_balance DESC;
+
+--SCHEMA-HEALTHCARE--
+
+1.Return the complete patient roster from the patients table.
+SELECT * FROM patients;
+
+2.Return all department names and their locations.
+SELECT department_name,location
+FROM departments;
+
+3.Return doctors assigned to the Cardiology department.
+SELECT first_name,last_name,specialty
+FROM doctors
+WHERE department_id=1;
+
+4.Return all female patients with their contact information.
+SELECT first_name,last_name,phone
+FROM patients
+WHERE gender='F';
+
+5.Return all doctors sorted by hire date from oldest to most recent.
+SELECT first_name,last_name,hire_date
+FROM doctors
+ORDER BY hire_date;
+
+6.Return all appointments with a Completed status.
+SELECT appointment_id,patient_id,appointment_date
+FROM appointments
+WHERE status='Completed';
+
+7.Count the total number of doctors on staff.
+SELECT COUNT(doctor_id) AS total_doctors
+FROM doctors;
+
+8.Return all diagnoses recorded in the year 2025.
+SELECT d.condition_name,d.diagnosis_date,p.last_name
+FROM diagnoses AS d
+JOIN patients AS p
+on d.patient_id=p.patient_id
+WHERE d.diagnosis_date BETWEEN '2025-01-01' AND '2025-12-31'
+ORDER BY d.diagnosis_date;
+
+9.Count appointments per year using strftime to extract the year from appointment_date. Show year and appointment_count. Order by year.
+SELECT DATE_FORMAT(appointment_date, '%Y') AS year,
+count(appointment_id) AS appointment_count
+FROM appointments
+GROUP BY year
+ORDER BY year;
+
+10.Show the number of distinct diagnoses per patient. Join patients to diagnoses. Show first name, last name, and diagnosis_count. Order by count descending.
+SELECT p.first_name, p.last_name, count(d.diagnosis_id) AS diagnosis_count
+FROM patients AS p
+JOIN diagnoses AS d
+on p.patient_id=d.patient_id
+GROUP BY p.first_name,p.last_name,d.patient_id
+ORDER BY diagnosis_count DESC;
