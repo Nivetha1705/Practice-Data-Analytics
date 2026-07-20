@@ -1,4 +1,4 @@
-cc-- SQL Practice Questions
+-- SQL Practice Questions
 -- This file contains all my SQL practice problems and solutions
 
 
@@ -1274,3 +1274,76 @@ JOIN diagnoses AS d
 on p.patient_id=d.patient_id
 GROUP BY p.first_name,p.last_name,d.patient_id
 ORDER BY diagnosis_count DESC;
+
+11.The scheduling team needs to review all appointments booked during a two-week window. Find all appointments with appointment_date between January 15, 2025 and January 20, 2025 (inclusive). Show appointment_id, patient_id, appointment_date, and status.
+SELECT DISTINCT p.first_name,p.last_name
+FROM patients AS p
+JOIN appointments AS a
+on p.patient_id=a.patient_id
+WHERE DATE_FORMAT(a.appointment_date, '%Y')=='2025';
+
+12.The analytics team wants to know what gender values exist in the patient database. List the distinct gender values from the patients table.
+SELECT DISTINCT gender
+FROM patients;
+
+13.The scheduling team needs to review all appointments booked during a two-week window. Find all appointments with appointment_date between January 15, 2025 and January 20, 2025 (inclusive). Show appointment_id, patient_id, appointment_date, and status.
+SELECT appointment_id,patient_id,appointment_date,status
+FROM appointments
+WHERE appointment_date BETWEEN '2025-01-15' AND '2025-01-20';
+
+14.Count the number of appointments per patient.
+SELECT patient_id,
+count(appointment_id) AS appointment_count
+FROM appointments
+GROUP BY patient_id;
+
+15.Return each doctors name paired with their department name.
+SELECT d.first_name,d.last_name,de.department_name
+FROM doctors AS d
+JOIN departments AS de
+on d.department_id=de.department_id;
+
+16.Return each diagnosis with the patients first name, last name, condition name, and diagnosis date.
+SELECT p.first_name,p.last_name,d.condition_name,d.diagnosis_date
+FROM patients AS p
+JOIN diagnoses AS d
+on p.patient_id=d.patient_id
+ORDER BY d.diagnosis_date;
+
+17.Return all scheduled appointments with patient and doctor full names.
+SELECT a.appointment_date,
+concat(p.first_name,' ',p.last_name) AS patient_name,
+concat(d.first_name,' ',d.last_name) AS doctor_name
+FROM doctors AS d
+JOIN appointments AS a
+on d.doctor_id=a.doctor_id
+JOIN patients AS p
+on p.patient_id=a.patient_id
+WHERE a.status='Scheduled'
+ORDER BY a.appointment_date;
+
+18.Return the number of doctors in each department.
+SELECT d.department_name,
+COUNT(do.doctor_id) AS doctor_count
+FROM departments AS d
+left JOIN doctors AS do
+on d.department_id=do.department_id
+GROUP BY d.department_name
+ORDER BY d.department_name;
+
+19.Return patients who have more than one recorded diagnosis.
+SELECT patient_id,
+COUNT(diagnosis_id) AS diagnosis_count
+FROM diagnoses
+GROUP BY patient_id
+HAVING COUNT(diagnosis_id)>1;
+
+20.Return each appointments date, patient last name, and the department of the attending doctor.
+SELECT a.appointment_date,
+p.last_name AS patient_last_name,
+d.department_name
+FROM appointments AS a
+JOIN patients AS p on a.patient_id=p.patient_id
+JOIN doctors AS doc on doc.doctor_id=a.doctor_id
+JOIN departments AS d on d.department_id=doc.department_id
+ORDER BY a.appointment_date, p.last_name;
