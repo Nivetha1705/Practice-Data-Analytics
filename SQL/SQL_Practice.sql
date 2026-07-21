@@ -1347,3 +1347,195 @@ JOIN patients AS p on a.patient_id=p.patient_id
 JOIN doctors AS doc on doc.doctor_id=a.doctor_id
 JOIN departments AS d on d.department_id=doc.department_id
 ORDER BY a.appointment_date, p.last_name;
+
+21.The hospital audit team needs a complete view of every appointment. Show full appointment details including patient name, doctor name, department name, appointment date, and status. Order by appointment date.
+SELECT p.first_name AS first_name,p.last_name AS last_name,
+doc.first_name AS dr_first,doc.last_name AS dr_last,
+dep.department_name,
+a.appointment_date,a.status
+ FROM appointments AS a
+ JOIN patients AS p on p.patient_id=a.patient_id
+ JOIN doctors AS doc on doc.doctor_id=a.doctor_id
+ JOIN departments AS dep on dep.department_id=doc.department_id
+ ORDER BY a.appointment_date;
+
+22.The admissions team wants to know which registered patients have never had an appointment scheduled. Find patients who have no appointment records. Show first name, last name, and gender.
+SELECT p.first_name,p.last_name, gender 
+FROM patients AS p
+left JOIN appointments AS a
+on p.patient_id=a.patient_id
+WHERE a.appointment_id IS NULL;
+
+23.Create a unified appointment list by combining Scheduled (labelled 'Upcoming') and Completed (labelled 'Past') appointments. Show patient_id, doctor_id, appointment_date, and category. Order by appointment_date.
+SELECT
+  patient_id,
+  doctor_id,
+  appointment_date,
+  'Upcoming' AS category
+FROM
+  appointments
+WHERE
+  status = 'Scheduled'
+UNION ALL
+SELECT
+  patient_id,
+  doctor_id,
+  appointment_date,
+  'Past' AS category
+FROM
+  appointments
+WHERE
+  status = 'Completed'
+ORDER BY
+  appointment_date;
+
+24.The clinical team wants to identify patients who have never received a diagnosis. Find all patients who have no records in the diagnoses table. Show first name, last name, and gender.
+SELECT p.first_name,p.last_name,p.gender FROM
+patients AS p
+left JOIN diagnoses AS d
+on p.patient_id = d.patient_id
+WHERE diagnosis_id IS NULL
+ORDER BY p.first_name;
+
+25.Generate a patient summary report showing every registered patient alongside how many diagnoses they have received, including patients with zero diagnoses. Show first name, last name, and diagnosis_count. Order by diagnosis_count descending, then last name.
+SELECT p.first_name,p.last_name, 
+COUNT(d.diagnosis_id) AS diagnosis_count
+FROM patients AS p
+left JOIN diagnoses AS d
+on p.patient_id=d.patient_id
+GROUP BY p.first_name,p.last_name,p.patient_id
+ORDER BY diagnosis_count DESC;  
+
+26.Find doctors who have more appointments than the average number of appointments for all doctors in their department. Show first name, last name, specialty, and appointment count.
+SELECT
+  d.first_name,
+  d.last_name,
+  d.specialty,
+  COUNT(a.appointment_id) AS appt_count
+FROM
+  doctors d
+  JOIN appointments a ON d.doctor_id = a.doctor_id
+GROUP BY
+  d.doctor_id,
+  d.first_name,
+  d.last_name,
+  d.specialty,
+  d.department_id
+HAVING
+  COUNT(a.appointment_id) > (
+    SELECT
+      AVG(cnt)
+    FROM
+      (
+        SELECT
+          COUNT(a2.appointment_id) AS cnt
+        FROM
+          doctors d2
+          JOIN appointments a2 ON d2.doctor_id = a2.doctor_id
+        WHERE
+          d2.department_id = d.department_id
+        GROUP BY
+          d2.doctor_id
+      )
+  )
+ORDER BY
+  appt_count DESC;
+
+27.Rank each doctor by their appointment count within their department. Show first name, last name, department_id, appt_count, and dept_rank. Order by department, then rank.
+SELECT d.first_name,d.last_name,d.department_id,
+COUNT(a.appointment_id) AS appt_count,
+RANK() OVER(PARTITION BY d.department_id ORDER BY COUNT(appointment_id) DESC) AS dept_rank
+FROM doctors AS d
+JOIN appointments AS a
+on d.doctor_id=a.doctor_id
+GROUP BY d.first_name,d.last_name,d.department_id
+ORDER BY d.department_id,appt_count DESC;
+
+28.Find the doctor with the most appointments in each department. Show doctor name, department name, and appointment count.
+WITH doctors_appointment AS (
+    SELECT
+        d.doctor_id,
+        d.first_name,
+        d.last_name,
+        dep.department_name,
+        COUNT(a.appointment_id) AS appt_count
+    FROM departments AS dep
+    JOIN doctors AS d
+        ON dep.department_id = d.department_id
+    JOIN appointments AS a
+        ON a.doctor_id = d.doctor_id
+    GROUP BY
+        d.doctor_id,
+        d.first_name,
+        d.last_name,
+        dep.department_name
+),
+
+Ranked_doctors AS (
+    SELECT *,
+           RANK() OVER (
+               PARTITION BY department_name
+               ORDER BY appt_count DESC
+           ) AS rnk
+    FROM doctors_appointment
+)
+
+SELECT
+    first_name,
+    last_name,
+    department_name,
+    appt_count
+FROM Ranked_doctors
+WHERE rnk = 1
+ORDER BY department_name;
+
+29.Classify patients into age groups based on their age as of 2026-01-01: Young Adult (under 35), Middle-Aged (35–49), Senior (50+). Show each groups patient count and average age. Order by avg_age ascending.
+WITH patient_ages AS (
+  SELECT patient_id,
+  first_name,
+  last_name,
+  (DATE_FORMAT('2026-01-01', '%Y') - DATE_FORMAT(date_of_birth, '%Y') ) AS age
+  FROM patients
+)
+SELECT
+CASE
+WHEN age<35 THEN 'Young Adult'
+WHEN age>=35 AND age<=49 THEN 'Middle-Aged'
+ELSE 'Senior'
+END AS age_group,
+COUNT(patient_id) AS patient_count,
+round(AVG(age),1) AS avg_age
+FROM patient_ages
+GROUP BY age_group
+ORDER BY avg_age;
+
+30.The operations team wants to flag doctors who are busier than the hospital average. Find doctors whose appointment count exceeds the hospital-wide average appointment count per doctor. Show first name, last name, specialty, and appointment count.
+SELECT
+  d.first_name,
+  d.last_name,
+  d.specialty,
+  COUNT(a.appointment_id) AS appt_count
+FROM
+  doctors d
+  JOIN appointments a ON d.doctor_id = a.doctor_id
+GROUP BY
+  d.doctor_id,
+  d.first_name,
+  d.last_name,
+  d.specialty
+HAVING
+  COUNT(a.appointment_id) > (
+    SELECT
+      AVG(cnt)
+    FROM
+      (
+        SELECT
+          COUNT(appointment_id) AS cnt
+        FROM
+          appointments
+        GROUP BY
+          doctor_id
+      )
+  )
+ORDER BY
+  appt_count DESC;
