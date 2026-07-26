@@ -1567,3 +1567,30 @@ where weight between 100 and 120;
 update patients
 set allergies='NKA'
 where allergies is null;
+
+6.Show first name and last name concatinated into one column to show their full name.
+select concat(first_name, ' ',last_name) as full_name
+from patients;
+
+7.Show first name, last name, and the full province name of each patient.
+select p.first_name,p.last_name, pn.province_name as province_name
+from patients as p
+join province_names as pn
+on p.province_id=pn.province_id;
+
+8.Show how many patients have a birth_date with 2010 as the birth year.
+select count(patient_id)
+from patients
+where birth_date between '2010-01-01' and '2010-12-31';
+
+9.Show the first_name, last_name, and height of the patient with the greatest height.
+select first_name,last_name,height
+from patients
+where height=(select
+max(height)
+from patients);
+
+10.Show all columns for patients who have one of the following patient_ids:1,45,534,879,1000
+select * from patients
+where patient_id in (1,45,534,879,1000);
+
