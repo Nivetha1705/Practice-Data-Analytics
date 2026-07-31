@@ -1762,3 +1762,74 @@ from admissions as a
 join doctors as d
 on d.doctor_id=a.attending_doctor_id
 group by doctor_id;
+
+37.Display the total amount of patients for each province. Order by descending.
+select pr.province_name,count(p.patient_id) as patient_count
+from patients as p
+join province_names as pr
+on p.province_id=pr.province_id
+group by province_name
+order by patient_count desc;
+
+38.For every admission, display the patient's full name, their admission diagnosis, and their doctor's full name who diagnosed their problem.
+select concat(p.first_name,' ',p.last_name) as patient_name,
+a.diagnosis,
+concat(d.first_name,' ',d.last_name) as doctor_name
+from admissions as a
+join patients as p
+on p.patient_id=a.patient_id
+join doctors as d
+on d.doctor_id=a.attending_doctor_id;
+
+39.display the first name, last name and number of duplicate patients based on their first name and last name.Ex: A patient with an identical name can be considered a duplicate.
+select first_name,last_name,
+count(*) as num_of_duplicates
+from patients
+group by first_name,last_name
+having num_of_duplicates>1;
+
+40.Display patients full name,height in the units feet rounded to 1 decimal,weight in the unit pounds rounded to 0 decimals,birth_date,gender non abbreviated.
+Convert CM to feet by dividing by 30.48. Convert KG to pounds by multiplying by 2.205.
+select concat(first_name,' ',last_name) as 'patient_name',
+round(height/30.48, 1) as 'height"Feet" ',
+round(weight*2.205, 0) as 'weight"Pounds" ', 
+birth_date,
+case
+when gender='M' then 'Male'
+else 'Female'
+end as 'gender_type'
+from patients;
+
+41.Show patient_id, first_name, last_name from patients whose does not have any records in the admissions table. (Their patient_id does not exist in any admissions.patient_id rows.)
+select p.patient_id,p.first_name,p.last_name
+from patients as p
+left join admissions as a
+on p.patient_id=a.patient_id
+where a.admission_date is null;
+
+42.Display a single row with max_visits, min_visits, average_visits where the maximum, minimum and average number of admissions per day is calculated. Average is rounded to 2 decimal places.
+select max(number_of_visits)as max_visits,
+min(number_of_visits) as min_visits,
+round(avg(number_of_visits),2) as average_visits
+from
+(
+select admission_date,
+count(*) as number_of_visits
+from admissions
+group by admission_date
+);
+
+43.Display every patient that has at least one admission and show their most recent admission along with the patient and doctors full name.
+select concat(p.first_name,' ',p.last_name) as patient_name,
+a.admission_date, 
+concat(d.first_name,' ',d.last_name) as doctor_name
+from admissions as a
+join patients as p
+on a.patient_id=p.patient_id
+join doctors as d
+on a.attending_doctor_id=d.doctor_id
+where a.admission_date=
+(
+select max(a2.admission_date)
+from admissions a2
+where a2.patient_id=p.patient_id);
