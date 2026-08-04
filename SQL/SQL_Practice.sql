@@ -1941,3 +1941,95 @@ on a.attending_doctor_id=d.doctor_id
 group by d.doctor_id,selected_year,doctor_name,d.specialty
 order by d.doctor_id,doctor_name,selected_year;
 
+--Questions practiced on platform - https://www.practice-sql.com/sql-practice
+
+-- EASY LEVEL --
+
+1.Retrieve all columns for every customer, ordered by ID.
+SELECT * FROM customers;
+
+2.Retrieve the name and price of all products in the 'Electronics' category, ordered by price descending.
+select name,price 
+from products
+where category='Electronics'
+order by price desc;
+
+3.Get all orders, sorted by the order date from newest to oldest, limited to the top 10.
+select id,customer_id,order_date,status
+from orders
+order by order_date desc
+limit 10;
+
+4.Find the total number of products available.
+select count(id) as total_products
+from products;
+
+5.Retrieve the IDs of all orders with a 'Shipped' status.
+select id from orders
+where status='Shipped';
+
+6.Retrieve the customer with ID 1.
+select * from customers
+where id =1;
+
+7.List products priced below $25.
+select * from products
+where price<25;
+
+8.Retrieve orders placed after 2023-03-01.
+select * from orders
+where order_date > '2023-03-01';
+
+9.Count orders with status 'Cancelled'.
+select count(status) as total
+from orders
+where status='Cancelled';
+
+10.Show all Office Supplies products.
+select * from products
+where category='Office Supplies';
+
+11.List customers who registered in 2023.
+select * from customers
+where registration_date between '2023-01-01' and '2023-12-31' ;
+
+12.Retrieve distinct product categories.
+select distinct category from products;
+
+13.Find the product with the lowest price.
+select name,price
+from products
+order by price 
+limit 1;
+
+14.Show IDs of orders with status 'Processing'.
+select id 
+from orders
+where status='Processing';
+
+15.Find the total number of customers.
+select count(*) from customers;
+
+16.Retrieve the product with the highest price.
+select name,price
+from products
+order by price desc
+limit 1;
+
+17.List all orders that have been delivered.
+select * from orders
+where status='Delivered';
+
+18.Find customers whose first name starts with 'A'.
+select * from customers
+where first_name like 'A%';
+
+19.Count how many orders were placed in March 2023.
+select count(*) as march_orders
+from orders
+where order_date between '2023-03-01' and '2023-03-31'; 
+
+20.Show products priced between $30 and $60.
+select * from products
+where price between 30 and 60;
+
