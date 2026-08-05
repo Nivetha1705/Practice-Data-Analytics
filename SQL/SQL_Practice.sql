@@ -2033,3 +2033,43 @@ where order_date between '2023-03-01' and '2023-03-31';
 select * from products
 where price between 30 and 60;
 
+---MEDIUM LEVEL---
+1.List each customers full name and the dates of all orders they have placed. Find the history for 'Liam Smith'.
+select c.first_name,c.last_name,o.order_date
+from customers as c
+join orders as o
+on c.id=o.customer_id
+where c.first_name="Liam" and c.last_name="Smith";
+
+2.Calculate the total revenue from all sales in the order_items table.
+select sum(quantity*price_per_unit) as total_revenue
+from order_items;
+
+3.Find the names of customers who have placed more than two orders.
+SELECT c.first_name, c.last_name, COUNT(o.id) as order_count
+FROM customers c
+JOIN orders o ON c.id = o.customer_id
+GROUP BY c.id, c.first_name, c.last_name
+HAVING COUNT(o.id) > 2
+ORDER BY order_count DESC, first_name;
+
+4.For order ID 1, list the names of the products ordered and their quantities.
+SELECT p.name, oi.quantity
+FROM order_items oi
+JOIN products p ON oi.product_id = p.id
+WHERE oi.order_id = 1;
+
+5.Find all customers who have not yet placed an order.
+select c.first_name,c.last_name
+from customers as c
+left join orders as o
+on c.id=o.customer_id
+where o.id is null;
+
+6.List order IDs and dates for customer 1.
+select id,order_date
+from orders
+where customer_id=1;
+
+
+
