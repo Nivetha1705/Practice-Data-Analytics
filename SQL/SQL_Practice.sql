@@ -2072,4 +2072,29 @@ from orders
 where customer_id=1;
 
 
+INTERVIEW PREPARATION QUESTIONS FOR MYSQL
+
+1 Second highest salary
+
+select Distinct salary as second_highest_salary
+from employees
+order by salary desc
+limit 1 offset 1;
+
+select max(salary) as second_highest_salary
+from employees
+where salary<(select max(salary) from employees);
+
+select * from (
+  select *,
+  dense_rank() over(order by salary desc) as salary_rnk
+  from employees
+)t
+where salary_rnk = 2;
+
+2.select name,email,salary,dept_id,
+count(*) as cnt
+from employees
+group by name,email,salary,dept_id
+having count(*) > 1;
 
