@@ -2092,9 +2092,70 @@ select * from (
 )t
 where salary_rnk = 2;
 
-2.select name,email,salary,dept_id,
+2.Find the duplicate records
+
+select name,email,salary,dept_id,
 count(*) as cnt
 from employees
 group by name,email,salary,dept_id
 having count(*) > 1;
 
+3.Identify and delete duplicate records from the employees table, keeping only the first occurrence based on the id column.
+
+WITH cte AS (
+    SELECT *,
+        ROW_NUMBER() OVER (PARTITION BY name, email ORDER BY id) AS rn
+    FROM employees
+)
+DELETE FROM cte WHERE rn > 1;
+
+4.Top 5 highest salaries
+
+select * from employees
+order by salary desc
+limit 5;
+
+5.Nth highest salary  (eg: N=3) --> 3rd highest salary
+
+select distinct salary from employees
+order by salary desc
+limit 1 offset 2;
+
+6.Departments and total salary expenditure
+
+select d.dept_name,sum(e.salary) as total_salary
+from employees as e
+join departments as d
+on e.dept_id=d.dept_id
+order by d.dept_name;
+
+7.Employees who joined in last 6 months
+
+select * from employees
+where join_date >=date_sub(curdate(),interval 6 month);
+
+8.Employees not in any department
+
+select * from employees
+where dept_id is null;
+
+9.Total number of employees in each department
+
+select d.dept_name, count(*) as total_employees
+from employees as e
+join departments as d
+on e.dept_id=d.dept_id
+group by d.dept_name
+order by count(*) desc;
+
+SELECT dept_id, COUNT(*) AS emp_count
+FROM Employees
+GROUP BY dept_id;
+
+10. Pivot data (department-wise employee count as columns)
+select
+sum(case when dept_id=1 then 1 else 0 end) as dept_1,
+sum(case when dept_id=2 then 1 else 0 end) as dept_2,
+sum(case when dept_id=3 then 1 else 0 end) as dept_3
+from employees
+order by dept_id;
