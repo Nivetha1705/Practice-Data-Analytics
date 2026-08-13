@@ -2159,3 +2159,27 @@ sum(case when dept_id=2 then 1 else 0 end) as dept_2,
 sum(case when dept_id=3 then 1 else 0 end) as dept_3
 from employees
 order by dept_id;
+
+11. Unpivot data
+select emp_id, 'Q1_Sales' as Metrics, q1_sales as value 
+from salespivot
+union all
+select emp_id, 'Q2_Sales' as Metrics, q2_sales as value 
+from salespivot
+union all
+select emp_id, 'Q3_Sales' as Metrics, q3_sales as value 
+from salespivot
+
+12. Month-over-month revenue growth
+select 
+date_format(sales_date, '%Y-%m') as month,
+sum(sales_amount) as total_sales,
+sum(sales_amount) - lag(sum(sales_amount)) over (order by date_format(sales_date, '%Y-%m')) as revenue_growth
+from sales
+group by date_format(sales_date, '%Y-%m');
+
+13. Running total of sales by date
+select sale_date,amount,
+sum(amount) over(order by sale_date) as running_total
+from sales;
+
