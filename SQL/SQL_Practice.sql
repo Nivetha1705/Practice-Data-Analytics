@@ -2104,10 +2104,11 @@ having count(*) > 1;
 
 WITH cte AS (
     SELECT *,
-        ROW_NUMBER() OVER (PARTITION BY name, email ORDER BY id) AS rn
+        ROW_NUMBER() OVER (PARTITION BY name, email ORDER BY id) AS dr
     FROM employees
 )
-DELETE FROM cte WHERE rn > 1;
+DELETE FROM cte 
+WHERE dr > 1;
 
 4.Top 5 highest salaries
 
@@ -2152,22 +2153,21 @@ SELECT dept_id, COUNT(*) AS emp_count
 FROM Employees
 GROUP BY dept_id;
 
-10. Pivot data (department-wise employee count as columns)
+10. Pivot data (department-wise employee count as columns)  #Converting rows into columns
 select
 sum(case when dept_id=1 then 1 else 0 end) as dept_1,
 sum(case when dept_id=2 then 1 else 0 end) as dept_2,
 sum(case when dept_id=3 then 1 else 0 end) as dept_3
-from employees
-order by dept_id;
+from employees;
 
-11. Unpivot data
-select emp_id, 'Q1_Sales' as Metrics, q1_sales as value 
+11. Unpivot data   #Converting columns into rows
+select emp_id, 'M1_Sales' as Metrics, q1_sales as value 
 from salespivot
 union all
-select emp_id, 'Q2_Sales' as Metrics, q2_sales as value 
+select emp_id, 'M2_Sales' as Metrics, q2_sales as value 
 from salespivot
 union all
-select emp_id, 'Q3_Sales' as Metrics, q3_sales as value 
+select emp_id, 'M3_Sales' as Metrics, q3_sales as value 
 from salespivot
 
 12. Month-over-month revenue growth
@@ -2178,8 +2178,39 @@ sum(sales_amount) - lag(sum(sales_amount)) over (order by date_format(sales_date
 from sales
 group by date_format(sales_date, '%Y-%m');
 
+WITH monthly_sales AS (
+    SELECT
+        DATE_FORMAT(sales_date, '%Y-%m') AS month,
+        SUM(sales_amount) AS total_sales
+    FROM sales
+    GROUP BY DATE_FORMAT(sales_date, '%Y-%m')
+)
+
+SELECT
+    month,
+    total_sales,
+    total_sales - LAG(total_sales) OVER (ORDER BY month) AS revenue_growth
+FROM monthly_sales;
+
 13. Running total of sales by date
 select sale_date,amount,
 sum(amount) over(order by sale_date) as running_total
 from sales;
 
+14. Find gaps in a sequence
+
+select n+1 as gap_start
+from numbers as t1
+where not exists(select 1 from numbers as t2 where t2.n=t1.n+1);
+
+15.
+with ranked as(
+  select user_id,login_date,
+  date_sub(login_date, row_number() over(partition by user_id order by login_date)day) as grp
+  from logins)
+
+  select user_id, count(*) as streak_days,min(login_date) as start_date, max(login_date) as end_date
+  from ranked
+  group by user_id,grp
+  order by streak_days desc;
+)
