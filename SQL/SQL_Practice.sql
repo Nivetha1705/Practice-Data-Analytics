@@ -2214,3 +2214,35 @@ with ranked as(
   group by user_id,grp
   order by streak_days desc;
 )
+
+16.First login date of each user
+
+select user_id,min(login_date) as first_login
+from logins
+group by user_id;
+
+17. Last purchase of each customer
+
+select customer_id, max(order_date) as last_purchase
+from orders
+group by customer_id;
+
+18.Customers who bought in all months
+
+select customer_id
+from orders
+group by customer_id
+having count(distinct month(order_date))=12;
+
+19. Products that were never ordered
+
+select p.product_id, p.product_name
+from products as p
+left join orders as o
+on p.product_id=o.product_id
+where o.product_id is null;
+
+20. Employees earning more than the average salary
+
+select * from employees
+where salary>(select avg(salary) from employees);
