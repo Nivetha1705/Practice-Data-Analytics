@@ -2246,3 +2246,51 @@ where o.product_id is null;
 
 select * from employees
 where salary>(select avg(salary) from employees);
+
+21. Employees earning more than their department average
+select * 
+from employees as e
+where salary > (select avg(salary) from employees as e2 
+where e2.dept_id = e.dept_id);
+
+22.Rank employees within each department by salary
+select emp_id,name,dept_id,salary,
+rank() over(partition by dept_id order by salary desc) as dept_rank
+from employees;
+
+23. Top 3 salaries in each department
+with cte as(
+  select emp_id,name,dept_id,salary,
+  dense_rank() over(partition by dept_id order by salary desc) as dept_rank
+  from employees 
+)
+select emp_id,name,dept_id,salary
+from cte
+where dept_rank<=3
+order by dept_id, dept_rank;
+
+SELECT * FROM (
+  SELECT emp_id, name, dept_id, salary,
+    DENSE_RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) AS rnk
+  FROM Employees
+) t
+WHERE rnk <= 3;
+
+24. Common records between two tables
+SELECT * FROM TableA
+INTERSECT
+SELECT * FROM TableB;
+-- MySQL 8.0.31+ supports INTERSECT. For older versions:
+SELECT DISTINCT a.* FROM TableA a
+JOIN TableB b ON a.id = b.id;
+
+25. Records in one table but not another
+select a.* from TableA as a
+join TableB as b
+on a.id=b.id
+where b.id is null;
+
+26. Split full name into first and last name
+select SUBSTRING_INDEX(full_name, ' ', 1) as first_name,
+select SUBSTRING_INDEX(full_name, ' ', -1)as last_name
+from employees;
