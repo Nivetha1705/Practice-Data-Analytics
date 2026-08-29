@@ -2294,3 +2294,18 @@ where b.id is null;
 select SUBSTRING_INDEX(full_name, ' ', 1) as first_name,
 select SUBSTRING_INDEX(full_name, ' ', -1)as last_name
 from employees;
+
+27. Concatenate first and last name into full name
+select concat(first_name, ' ', last_name) as full_name
+from employees;
+
+28. Extract year, month, day from a date column
+select year(order_date) as order_year,
+select month(order_date) as order_month,
+select day(order_date) as order_day
+from orders;
+
+29. Calculate age from date of birth
+select age,
+Timestampdiff(year, dob, curdate()) as age
+from employees;
