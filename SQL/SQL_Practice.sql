@@ -2309,3 +2309,10 @@ from orders;
 select age,
 Timestampdiff(year, dob, curdate()) as age
 from employees;
+
+31. Employees with the same salary
+select salary, count(*) as num_employees
+from employees  
+group by salary
+having count(*) > 1;
+
