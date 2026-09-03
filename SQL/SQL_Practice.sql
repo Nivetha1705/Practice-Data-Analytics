@@ -2316,3 +2316,30 @@ from employees
 group by salary
 having count(*) > 1;
 
+32. Highest paid employee in each department
+select e.dept_id, e.name, e.salary
+from employees e
+join (
+  select dept_id, max(salary) as max_salary
+  from employees
+  group by dept_id
+) d on e.dept_id = d.dept_id and e.salary = d.max_salary;
+
+
+SELECT dept_id, name, salary
+FROM (
+    SELECT dept_id, name, salary,
+           RANK() OVER(PARTITION BY dept_id ORDER BY salary DESC) AS rnk
+    FROM employees
+) e
+WHERE rnk = 1;
+
+33. All managers and their reporting employees
+select m.name as Manager_name, e.name as Employee_name
+from employees as e
+join employees as m
+on e.manager_id=m.emp_id;
+
+34. Reverse a string
+select Reverse(name) as reversed_name
+from employees;
