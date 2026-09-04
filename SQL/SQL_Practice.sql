@@ -2310,13 +2310,13 @@ select age,
 Timestampdiff(year, dob, curdate()) as age
 from employees;
 
-31. Employees with the same salary
+30. Employees with the same salary
 select salary, count(*) as num_employees
 from employees  
 group by salary
 having count(*) > 1;
 
-32. Highest paid employee in each department
+31. Highest paid employee in each department
 select e.dept_id, e.name, e.salary
 from employees e
 join (
@@ -2334,12 +2334,49 @@ FROM (
 ) e
 WHERE rnk = 1;
 
-33. All managers and their reporting employees
+32. All managers and their reporting employees
 select m.name as Manager_name, e.name as Employee_name
 from employees as e
 join employees as m
 on e.manager_id=m.emp_id;
 
-34. Reverse a string
+33. Reverse a string
 select Reverse(name) as reversed_name
 from employees;
+
+34. Rows where a column is NULL
+select * 
+from employees
+where dept_id is null;
+
+35.Replace NULL values with a default value
+select emp_id,name
+Coalesce(dept_id, 0) as dept_id
+from employees; 
+
+36.Trim spaces from beginning and end of a string
+select emp_id, 
+Trim(name) as Trimmed_name
+from employees;
+
+37. Most frequently ordered product
+select p.product_name, count(oi.product_id) as order_count
+from products as p
+join order_items as oi
+on p.product_id=oi.product_id
+order by order_count desc
+limit 1;
+
+SELECT product_id, COUNT(*) AS order_count
+FROM Orders
+GROUP BY product_id
+ORDER BY order_count DESC
+LIMIT 1;
+
+48. Year-over-year growth
+select year(sale_date) as sale_year,
+sum(amount) as revenue,
+sum(amount) - lag(sum(amount)) over (order by year(sale_date)) as revenue_growth
+from sales
+group by year(sale_date);
+
