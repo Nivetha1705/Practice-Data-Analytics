@@ -2373,10 +2373,18 @@ GROUP BY product_id
 ORDER BY order_count DESC
 LIMIT 1;
 
-48. Year-over-year growth
+38. Year-over-year growth
 select year(sale_date) as sale_year,
 sum(amount) as revenue,
 sum(amount) - lag(sum(amount)) over (order by year(sale_date)) as revenue_growth
 from sales
 group by year(sale_date);
 
+39.Moving average of sales (3 day windoow)
+select sale_date,amount,
+avg(amount) over(order by sale_date rows between 2 preceeding and current row) as moving_avg_3day
+from sales;
+
+40.Difference between two dates in days
+select datediff(end_date, start_date) as day_diff
+from projects;
