@@ -2388,3 +2388,19 @@ from sales;
 40.Difference between two dates in days
 select datediff(end_date, start_date) as day_diff
 from projects;
+
+41.Second most frequent salary
+select salary
+from employees
+group by salary
+order by count(*) desc
+limit 1 offset 1;
+
+42.Employees who earn between 10k and 20k
+select * from employees
+where salary between 10000 and 20000;
+
+43.Delete records having duplicate values based on one column
+Delete e1 from employees as e1
+join employees as e2
+on e1.email=e2.email and e1.emp_id > e2.emp_id; 
