@@ -2404,3 +2404,15 @@ where salary between 10000 and 20000;
 Delete e1 from employees as e1
 join employees as e2
 on e1.email=e2.email and e1.emp_id > e2.emp_id; 
+
+44.Update salary by 10% for a specific department
+update employees
+set salary = salary * 1.10
+where dept_id=3;
+
+45.Find employee name in UPPERCASE and lowercase
+select name,
+upper(name) as upper_name,
+lower(name) as lower_name
+from employees;
+
