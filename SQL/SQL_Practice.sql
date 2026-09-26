@@ -2499,3 +2499,4 @@ sum(purchase_amount) as revenue_contribution
 from customer
 group by age_group
 order by revenue_contribution desc;
+
